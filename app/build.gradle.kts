@@ -78,6 +78,15 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    // ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7") // or latest
+
+// ViewModel support for Jetpack Compose
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+
+// Kotlin coroutines (if you're using them in the ViewModel)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1")
+
 
     //ktor
     implementation("io.ktor:ktor-client-android:3.1.1")
@@ -87,7 +96,11 @@ dependencies {
     implementation("io.github.jan-tennert.supabase:postgrest-kt")
     implementation("io.github.jan-tennert.supabase:auth-kt")
     implementation("io.github.jan-tennert.supabase:realtime-kt")
+    implementation("io.github.jan-tennert.supabase:storage-kt")
 
-    //coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1")
+    // Navigation for Jetpack Compose
+    implementation("androidx.navigation:navigation-compose:2.8.9")
+
+
+    implementation ("androidx.compose.material:material-icons-extended:1.7.8")
 }

@@ -7,7 +7,9 @@ sealed class UiState<out T> {
     data class Error(val message: String) : UiState<Nothing>()
 }
 
-// Specific UI states for each feature
+//UI states for each feature
+data class SignUpUiState(val user: User? = null)
+data class SignInUiState(val user: User? = null)
 data class ProfileUiState(val profile: Profile? = null)
 data class StoriesUiState(val stories: List<Story> = emptyList())
 data class ContributionUiState(val contribution: Contribution? = null)

@@ -2,6 +2,8 @@ package com.example.plotpot.customs
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.plotpot.screens.signin.SignInViewModel
+import com.example.plotpot.screens.signup.SignUpViewModel
 import com.example.plotpot.viewmodels.AnimationViewModel
 import com.example.plotpot.viewmodels.ChallengeViewModel
 import com.example.plotpot.viewmodels.ContributionViewModel
@@ -15,6 +17,14 @@ class PlotPotViewModelFactory(private val supabase: SupabaseClient) : ViewModelP
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
+            modelClass.isAssignableFrom(SignInViewModel::class.java) -> {
+                SignInViewModel(supabase) as T
+            }
+
+            modelClass.isAssignableFrom(SignUpViewModel::class.java) -> {
+                SignUpViewModel(supabase) as T
+            }
+
             modelClass.isAssignableFrom(ProfileViewModel::class.java) -> {
                 ProfileViewModel(supabase) as T
             }
