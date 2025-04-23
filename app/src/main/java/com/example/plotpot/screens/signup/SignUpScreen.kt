@@ -1,21 +1,32 @@
 package com.example.plotpot.screens.signup
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -31,15 +42,14 @@ import com.example.plotpot.R
 @Composable
 fun SignUpScreen(
     modifier: Modifier = Modifier,
-    onSignUpSuccess: () -> Unit // Callback to navigate after successful sign-up
+    onSignUpSuccess: () -> Unit,
+    onNavigateToLogin: () -> Unit // Added for better navigation flow
 ) {
-    // State for input fields
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) } // For password visibility toggle
     val viewModel: SignUpViewModel = viewModel(factory = PlotPotViewModelFactory(supabase))
-
-    // Collect the UI state from the ViewModel
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     // Gradient background
@@ -47,6 +57,14 @@ fun SignUpScreen(
         Color(0xFF6B48FF), // Purple
         Color(0xFF00C4B4)  // Teal
     )
+
+
+    // Handle success state
+    LaunchedEffect(uiState) {
+        if (uiState is UiState.Success) {
+            onSignUpSuccess()
+        }
+    }
 
     Box(
         modifier = modifier
@@ -58,12 +76,12 @@ fun SignUpScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .padding(horizontal = 24.dp)
+                .verticalScroll(rememberScrollState()), // Make scrollable for small screens
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Top
         ) {
-            Text("Sign Up", color = Color.White, fontSize = 24.sp)
-            // Logo (replace with your actual logo resource)
+            // Logo at the top
             Box(
                 modifier = Modifier
                     .size(200.dp)
@@ -72,197 +90,263 @@ fun SignUpScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.plotpotlogo), // Replace with your logo resource
-                    contentDescription = "Logo",
-                    modifier = Modifier.size(200.dp)
+                    painter = painterResource(id = R.drawable.plotpotlogo),
+                    contentDescription = "App Logo",
+                    modifier = Modifier
+                        .size(200.dp)
+                        .padding(bottom = 24.dp),
+                    contentScale = ContentScale.Fit,
                 )
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Email TextField
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email", color = Color.Black) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(8.dp)),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.White,
-                    unfocusedBorderColor = Color.White,
-                    focusedLabelColor = Color.White,
-                    unfocusedLabelColor = Color.White,
-                    cursorColor = Color.White,
-                    focusedTextColor = Color.Black,
-                    unfocusedTextColor = Color.Black,
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White
-                )
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Password TextField
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("Password", color = Color.Black) },
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(8.dp)),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.White,
-                    unfocusedBorderColor = Color.White,
-                    focusedLabelColor = Color.White,
-                    unfocusedLabelColor = Color.White,
-                    cursorColor = Color.White,
-                    focusedTextColor = Color.Black,
-                    unfocusedTextColor = Color.Black,
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White
-                )
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Username TextField
-            OutlinedTextField(
-                value = username,
-                onValueChange = { username = it },
-                label = { Text("Username", color = Color.Black) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(8.dp)),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.White,
-                    unfocusedBorderColor = Color.White,
-                    focusedLabelColor = Color.White,
-                    unfocusedLabelColor = Color.White,
-                    cursorColor = Color.White,
-                    focusedTextColor = Color.Black,
-                    unfocusedTextColor = Color.Black,
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White
-                )
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Sign Up Button
-            Button(
-                onClick = {
-                    viewModel.signUpUser(email, password, username)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF6B48FF), // Teal
-                    contentColor = Color.Black
-                ),
-                enabled = uiState !is UiState.Loading
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Sign Up",
-                    fontSize = 16.sp
+                    "Create Account",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = Color.Black,
+                    modifier = Modifier.padding(bottom = 16.dp)
                 )
-            }
 
-            // Display error message if any
-            when (uiState) {
-                is UiState.Error -> {
+                // Email Field
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Email") },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    ),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color(0xFF6B48FF),
+                        unfocusedIndicatorColor = Color.LightGray
+                    )
+                )
+
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Username Field
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    label = { Text("Username") },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Done
+                    ),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color(0xFF6B48FF),
+                        unfocusedIndicatorColor = Color.LightGray
+                    )
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Password Field with visibility toggle
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Password") },
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Next
+                    ),
+                    singleLine = true,
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                                tint = Color(0xFF6B48FF)
+                            )
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color(0xFF6B48FF),
+                        unfocusedIndicatorColor = Color.LightGray
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Sign Up Button
+                Button(
+                    onClick = {
+                        viewModel.signUpUser(email, password, username)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF6B48FF),
+                        contentColor = Color.White
+                    ),
+                    enabled = uiState !is UiState.Loading &&
+                            email.isNotBlank() &&
+                            password.isNotBlank() &&
+                            username.isNotBlank()
+                ) {
+                    if (uiState is UiState.Loading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(
+                            text = "Sign Up",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+
+                // Error message
+                if (uiState is UiState.Error) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = (uiState as UiState.Error).message,
-                        color = Color.Red,
-                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center
                     )
                 }
 
-                is UiState.Success -> {
-                    // Navigate to the next screen on success
-                    LaunchedEffect(Unit) {
-                        onSignUpSuccess()
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Already have an account? Login
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text("Already have an account?")
+                    TextButton(onClick = { onNavigateToLogin() }) {
+                        Text(
+                            "Login",
+                            color = Color(0xFF6B48FF),
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
-
-                else -> {}
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
 
-            // Divider with "or"
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Or continue with
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Divider(
+                HorizontalDivider(
                     modifier = Modifier.weight(1f),
+                    thickness = 1.dp,
                     color = Color.White
                 )
                 Text(
-                    text = "or",
+                    text = "or continue with",
                     color = Color.White,
-                    modifier = Modifier.padding(horizontal = 8.dp)
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    style = MaterialTheme.typography.labelMedium
                 )
-                Divider(
+                HorizontalDivider(
                     modifier = Modifier.weight(1f),
+                    thickness = 1.dp,
                     color = Color.White
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // Alternative Sign-Up Buttons (e.g., Google, Apple)
+            // Social login buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
+                // Google button
+                OutlinedButton(
                     onClick = { /* Handle Google sign-up */ },
                     modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(Color.White)
-                ) {
-                    Text(
-                        text = "G", // Placeholder for Google icon
-                        color = Color.Black,
-                        fontSize = 24.sp
+                        .height(48.dp)
+                        .width(120.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, Color.White),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = Color.White
                     )
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.plotpotlogo),
+                            contentDescription = "Google",
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Google")
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                IconButton(
+                // Apple button
+                OutlinedButton(
                     onClick = { /* Handle Apple sign-up */ },
                     modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(Color.White)
-                ) {
-                    Text(
-                        text = "A", // Placeholder for Apple icon
-                        color = Color.Black,
-                        fontSize = 24.sp
+                        .height(48.dp)
+                        .width(120.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, Color.White),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = Color.White
                     )
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.plotpotlogo),
+                            contentDescription = "Apple",
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Apple")
+                    }
                 }
             }
         }
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, device = "spec:width=411dp,height=891dp")
 @Composable
 fun SignUpScreenPreview() {
     SignUpScreen(
         modifier = Modifier,
-        onSignUpSuccess = {})
+        onSignUpSuccess = {},
+        onNavigateToLogin = {}
+    )
 }

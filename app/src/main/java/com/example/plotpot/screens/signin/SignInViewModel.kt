@@ -1,10 +1,12 @@
 package com.example.plotpot.screens.signin
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.plotpot.models.SignInUiState
 import com.example.plotpot.models.UiState
 import com.example.plotpot.models.User
+import com.example.plotpot.models.Profile // Import the new Profile class
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
@@ -15,7 +17,7 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 class SignInViewModel(private val supabase: SupabaseClient) : ViewModel() {
-    private val _uiState = MutableStateFlow<UiState<SignInUiState>>(UiState.Loading)
+    private val _uiState = MutableStateFlow<UiState<SignInUiState>>(UiState.Initial)
     val uiState: StateFlow<UiState<SignInUiState>> = _uiState
 
     // Sign in user with email and password
@@ -54,23 +56,28 @@ class SignInViewModel(private val supabase: SupabaseClient) : ViewModel() {
                     return@launch
                 }
 
-                // Fetch the username from the profiles table
+                // Fetch the profile from the profiles table
                 val userId =
                     UUID.fromString(authUser.id) // Convert Supabase user ID (String) to UUID
                 val profile = supabase.from("profiles")
                     .select { filter { eq("id", userId) } }
-                    .decodeSingleOrNull<Map<String, Any>>()
+                    .decodeSingleOrNull<Profile>() // Deserialize into Profile class
 
-                val username = profile?.get("username") as? String ?: "Unknown"
+                if (profile == null) {
+                    _uiState.value = UiState.Error("Sign-in failed: Profile not found")
+                    return@launch
+                }
 
                 // Map the Supabase user to your custom User model
                 val user = User(
                     id = userId,
                     email = authUser.email ?: email,
-                    username = username
+                    username = profile.username
                 )
                 _uiState.value = UiState.Success(SignInUiState(user))
+                Log.d("SignInViewModel", "Sign-in successful: $user")
             } catch (e: Exception) {
+                Log.e("SignInViewModel", "Sign-in failed", e)
                 _uiState.value = UiState.Error("Sign-in failed: ${e.message}")
             }
         }
