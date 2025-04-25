@@ -1,6 +1,7 @@
 package com.example.plotpot.viewmodels
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -28,6 +29,7 @@ class ContributionViewModel(private val supabase: SupabaseClient) : ViewModel() 
                     .decodeList<Contribution>()
                 _uiState.value = UiState.Success(ContributionUiState(contributions.firstOrNull()))
             } catch (e: Exception) {
+                Log.e("ContributionViewModel", "Failed to fetch contributions: ${e.message}")
                 _uiState.value = UiState.Error("Failed to fetch contributions: ${e.message}")
             }
         }
