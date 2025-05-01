@@ -21,6 +21,7 @@ class ContributionViewModel(private val supabase: SupabaseClient) : ViewModel() 
     private val _uiState = MutableStateFlow<UiState<ContributionUiState>>(UiState.Loading)
     val uiState: StateFlow<UiState<ContributionUiState>> = _uiState
 
+    //fetch story contribution by id
     fun fetchContributionsForStory(storyId: Long) {
         viewModelScope.launch {
             try {
@@ -35,6 +36,21 @@ class ContributionViewModel(private val supabase: SupabaseClient) : ViewModel() 
         }
     }
 
+    //fetch recent user story contributions
+    fun fetchRecentContributions() {
+        viewModelScope.launch {
+            try {
+                val recentContributions =
+                    supabase.from("contributions").select().decodeList<Contribution>()
+                _uiState.value =
+                    UiState.Success(ContributionUiState(contributions = recentContributions))
+            } catch (e: Exception) {
+                Log.e("ContributionViewModel", "Failed to fetch recent contributions: ${e.message}")
+            }
+        }
+    }
+
+    //add a story contribution
     @RequiresApi(Build.VERSION_CODES.O)
     fun addContribution(storyId: Long, userId: UUID, sentence: String) {
         viewModelScope.launch {

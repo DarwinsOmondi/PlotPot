@@ -13,6 +13,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.plotpot.screens.create.CreateStoryScreen
+import com.example.plotpot.screens.home.HomeScreen
 import com.example.plotpot.screens.signin.SignInScreen
 import com.example.plotpot.screens.signup.SignUpScreen
 import com.example.plotpot.ui.theme.PlotPotTheme
@@ -54,6 +56,10 @@ fun PlotPot(navController: NavHostController, modifier: Modifier = Modifier) {
                 onSignInSuccess = { navController.navigate("home") },
                 onNavigateToSignUp = { navController.navigate("signup") }
             )
+        }
+        composable("home") { HomeScreen(navController) }
+        composable("create") {
+            CreateStoryScreen()
         }
     }
 }

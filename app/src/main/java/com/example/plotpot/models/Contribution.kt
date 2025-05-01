@@ -16,3 +16,13 @@ data class Contribution(
     @Serializable(with = OffsetDateTimeSerializer::class)
     val createdAt: OffsetDateTime // timestamp with time zone
 )
+
+//data class ContributionWithDetails(
+//    val id: Long,
+//    val storyId: Long,
+//    val userId: UUID,
+//    val sentence: String,
+//    val createdAt: OffsetDateTime,
+//    val storyTitle: String,
+//    val username: String
+//)

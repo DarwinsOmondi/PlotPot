@@ -13,7 +13,10 @@ data class SignUpUiState(val user: User? = null)
 data class SignInUiState(val user: User? = null)
 data class ProfileUiState(val profile: Profile? = null)
 data class StoriesUiState(val stories: List<Story> = emptyList())
-data class ContributionUiState(val contribution: Contribution? = null)
 data class VoteUiState(val votes: List<Vote> = emptyList())
 data class AnimationUiState(val animation: Animation? = null)
 data class ChallengeUiState(val challenges: List<Challenge> = emptyList())
+data class ContributionUiState(
+    val contribution: Contribution? = null,
+    val contributions: List<Contribution> = emptyList()
+)
