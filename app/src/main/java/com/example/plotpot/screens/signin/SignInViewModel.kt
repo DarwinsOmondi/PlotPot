@@ -1,6 +1,8 @@
 package com.example.plotpot.screens.signin
 
+import android.content.Context
 import android.util.Log
+import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.plotpot.models.SignInUiState
@@ -86,5 +88,9 @@ class SignInViewModel(private val supabase: SupabaseClient) : ViewModel() {
     // Basic email validation
     private fun isValidEmail(email: String): Boolean {
         return email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$".toRegex())
+    }
+    fun saveUserLoggedInStates(context: Context, isLoggedIn: Boolean) {
+        val sharedPreferences = context.getSharedPreferences("UrbanGo", Context.MODE_PRIVATE)
+        sharedPreferences.edit() { putBoolean("isLoggedIn", isLoggedIn) }
     }
 }

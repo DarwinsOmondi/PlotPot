@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -50,7 +51,7 @@ fun SignInScreen(
     var passwordVisible by remember { mutableStateOf(false) } // For password visibility toggle
     val viewModel: SignInViewModel = viewModel(factory = PlotPotViewModelFactory(supabase))
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
+    val context = LocalContext.current
     // Gradient background
     val gradientColors = listOf(
         Color(0xFF6B48FF), // Purple
@@ -161,10 +162,11 @@ fun SignInScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Sign Up Button
+                //sign in button
                 Button(
                     onClick = {
                         viewModel.signInUser(email, password)
+                        viewModel.saveUserLoggedInStates(context, true)
                     },
                     modifier = Modifier
                         .fillMaxWidth()

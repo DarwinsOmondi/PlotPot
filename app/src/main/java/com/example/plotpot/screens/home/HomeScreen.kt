@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,9 +27,11 @@ import com.example.plotpot.models.Challenge
 import com.example.plotpot.models.Contribution
 import com.example.plotpot.models.Story
 import com.example.plotpot.models.UiState
+import com.example.plotpot.utils.BottomNavBar
 import com.example.plotpot.viewmodels.ChallengeViewModel
 import com.example.plotpot.viewmodels.ContributionViewModel
 import com.example.plotpot.viewmodels.StoryViewModel
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import io.github.jan.supabase.auth.auth
 
 
@@ -54,200 +57,202 @@ fun HomeScreen(navHostController: NavHostController) {
     LaunchedEffect(Unit) {
 
     }
-
     // Gradient background
     val gradientColors = listOf(
         Color(0xFF6B48FF), // Purple
         Color(0xFF00C4B4)  // Teal
     )
-    Scaffold(topBar = {
-        TopAppBar(
-            title = {
-                Text("Create Story")
-            }
-        )
-    }) { innerPadding ->
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .background(
-                    brush = Brush.verticalGradient(colors = gradientColors)
-                )
-        ) {
-            LazyColumn(
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text("Create Story")
+                }
+            )
+        },
+        bottomBar = {
+            BottomNavBar(navHostController)
+        },
+        content = { innerPadding ->
+            Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
+                    .padding(innerPadding)
+                    .background(
+                        brush = Brush.verticalGradient(colors = gradientColors)
+                    )
             ) {
-                // Featured Stories Section
-                item {
-                    Text(
-                        text = "Featured Stories",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    when (storyState) {
-                        is UiState.Loading -> {
-                            CircularProgressIndicator(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                color = Color.White
-                            )
-                        }
-
-                        is UiState.Success -> {
-                            if (storyState.data.stories.isEmpty()) {
-                                Text(
-                                    text = "No featured stories available.",
-                                    color = Color.White,
-                                    modifier = Modifier.padding(16.dp)
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                ) {
+                    // Featured Stories Section
+                    item {
+                        Text(
+                            text = "Featured Stories",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        when (storyState) {
+                            is UiState.Loading -> {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    color = Color.White
                                 )
-                            } else {
-                                LazyRow(
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            }
+
+                            is UiState.Success -> {
+                                if (storyState.data.stories.isEmpty()) {
+                                    Text(
+                                        text = "No featured stories available.",
+                                        color = Color.White,
+                                        modifier = Modifier.padding(16.dp)
+                                    )
+                                } else {
+                                    LazyRow(
+                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                    ) {
+                                        items(storyState.data.stories) { story ->
+                                            FeaturedStoriesCard(
+                                                story = story,
+                                                onClick = {
+                                                    // Navigate to story details screen
+                                                    navHostController.navigate("storyDetails/${story.id}")
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            is UiState.Error -> {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    items(storyState.data.stories) { story ->
-                                        FeaturedStoriesCard(
-                                            story = story,
-                                            onClick = {
-                                                // Navigate to story details screen
-                                                navHostController.navigate("storyDetails/${story.id}")
-                                            }
+                                    Text(
+                                        text = storyState.message,
+                                        color = Color.Red,
+                                        fontSize = 14.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    TextButton(onClick = { storyViewModel.fetchStories(isCompleted = false) }) {
+                                        Text(
+                                            text = "Retry",
+                                            color = Color.White
                                         )
                                     }
                                 }
                             }
-                        }
 
-                        is UiState.Error -> {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    text = storyState.message,
-                                    color = Color.Red,
-                                    fontSize = 14.sp
+                            else -> {}
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
+
+                    // Ongoing Challenges Section
+                    item {
+                        Text(
+                            text = "Ongoing Challenges",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        when (challengeState) {
+                            is UiState.Loading -> {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    color = Color.White
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                TextButton(onClick = { storyViewModel.fetchStories(isCompleted = false) }) {
+                            }
+
+                            is UiState.Success -> {
+                                if (challengeState.data.challenges.isEmpty()) {
                                     Text(
-                                        text = "Retry",
-                                        color = Color.White
+                                        text = "No ongoing challenges available.",
+                                        color = Color.White,
+                                        modifier = Modifier.padding(16.dp)
                                     )
+                                } else {
+                                    LazyRow(
+                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                    ) {
+                                        items(challengeState.data.challenges) { challenge ->
+                                            ChallengeCard(
+                                                challenge = challenge,
+                                                onClick = {
+                                                    // Navigate to challenge details screen
+                                                    navHostController.navigate("challengeDetails/${challenge.id}")
+                                                }
+                                            )
+                                        }
+                                    }
                                 }
                             }
-                        }
 
-                        else -> {}
-                    }
-                    Spacer(modifier = Modifier.height(24.dp))
-                }
-
-                // Ongoing Challenges Section
-                item {
-                    Text(
-                        text = "Ongoing Challenges",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    when (challengeState) {
-                        is UiState.Loading -> {
-                            CircularProgressIndicator(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                color = Color.White
-                            )
-                        }
-
-                        is UiState.Success -> {
-                            if (challengeState.data.challenges.isEmpty()) {
-                                Text(
-                                    text = "No ongoing challenges available.",
-                                    color = Color.White,
-                                    modifier = Modifier.padding(16.dp)
-                                )
-                            } else {
-                                LazyRow(
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            is UiState.Error -> {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    items(challengeState.data.challenges) { challenge ->
-                                        ChallengeCard(
-                                            challenge = challenge,
-                                            onClick = {
-                                                // Navigate to challenge details screen
-                                                navHostController.navigate("challengeDetails/${challenge.id}")
-                                            }
+                                    Text(
+                                        text = challengeState.message,
+                                        color = Color.Red,
+                                        fontSize = 14.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    TextButton(onClick = { challengeViewModel.fetchChallenges() }) {
+                                        Text(
+                                            text = "Retry",
+                                            color = Color.White
                                         )
                                     }
                                 }
                             }
-                        }
 
-                        is UiState.Error -> {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    text = challengeState.message,
-                                    color = Color.Red,
-                                    fontSize = 14.sp
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                TextButton(onClick = { challengeViewModel.fetchChallenges() }) {
-                                    Text(
-                                        text = "Retry",
-                                        color = Color.White
-                                    )
-                                }
-                            }
+                            else -> {}
                         }
-
-                        else -> {}
+                        Spacer(modifier = Modifier.height(24.dp))
                     }
-                    Spacer(modifier = Modifier.height(24.dp))
-                }
 
-                // Recent Contributions Section
-                item {
-                    Text(
-                        text = "Recent Contributions",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    when (contributionState) {
-                        is UiState.Loading -> {
-                            CircularProgressIndicator(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                color = Color.White
-                            )
-                        }
-
-                        is UiState.Success -> {
-                            if (contributionState.data.contributions.isEmpty()) {
-                                Text(
-                                    text = "No recent contributions available.",
-                                    color = Color.White,
-                                    modifier = Modifier.padding(16.dp)
+                    // Recent Contributions Section
+                    item {
+                        Text(
+                            text = "Recent Contributions",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        when (contributionState) {
+                            is UiState.Loading -> {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    color = Color.White
                                 )
-                            } else {
+                            }
+
+                            is UiState.Success -> {
+                                if (contributionState.data.contributions.isEmpty()) {
+                                    Text(
+                                        text = "No recent contributions available.",
+                                        color = Color.White,
+                                        modifier = Modifier.padding(16.dp)
+                                    )
+                                } else {
 //                            LazyColumn(
 //                                verticalArrangement = Arrangement.spacedBy(16.dp)
 //                            ) {
@@ -263,38 +268,39 @@ fun HomeScreen(navHostController: NavHostController) {
 //                                    )
 //                                }
 //                            }
-                            }
-                        }
-
-                        is UiState.Error -> {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    text = contributionState.message,
-                                    color = Color.Red,
-                                    fontSize = 14.sp
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                TextButton(onClick = { contributionViewModel.fetchRecentContributions() }) {
-                                    Text(
-                                        text = "Retry",
-                                        color = Color.White
-                                    )
                                 }
                             }
-                        }
 
-                        else -> {}
+                            is UiState.Error -> {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = contributionState.message,
+                                        color = Color.Red,
+                                        fontSize = 14.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    TextButton(onClick = { contributionViewModel.fetchRecentContributions() }) {
+                                        Text(
+                                            text = "Retry",
+                                            color = Color.White
+                                        )
+                                    }
+                                }
+                            }
+
+                            else -> {}
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
                     }
-                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
         }
-    }
+    )
 }
 
 @Composable
