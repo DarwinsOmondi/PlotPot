@@ -3,12 +3,15 @@ package com.example.plotpot.viewmodels
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.plotpot.models.StoriesUiState
 import com.example.plotpot.models.Story
 import com.example.plotpot.models.UiState
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -55,11 +58,19 @@ class StoryViewModel(private val supabase: SupabaseClient) : ViewModel() {
 
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun createStory(userId: UUID, title: String, description: String?, totalSentences: Int) {
+    fun createStory(title: String, description: String?, totalSentences: Int) {
         viewModelScope.launch {
             try {
+                val authUser = supabase.auth.currentUserOrNull()
+                if (authUser == null) {
+                    _uiState.value =
+                        UiState.Error("User not logged in")
+                    return@launch
+                }
+                val userId =
+                    UUID.fromString(authUser.id) // Convert Supabase user ID (String) to UUID
                 val newStory = Story(
-                    id = 0, // Will be auto-generated
+                    id = 0,
                     title = title,
                     description = description,
                     createdBy = userId,
@@ -69,6 +80,7 @@ class StoryViewModel(private val supabase: SupabaseClient) : ViewModel() {
                 )
                 supabase.from("stories").insert(newStory)
                 fetchStories() // Refresh the list
+                Log.e("StoryViewModel", "Story Added Successfully")
             } catch (e: Exception) {
                 _uiState.value = UiState.Error("Failed to create story: ${e.message}")
                 Log.e("StoryViewModel", "Failed to create story: ${e.message}")

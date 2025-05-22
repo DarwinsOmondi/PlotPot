@@ -81,10 +81,10 @@ dependencies {
     // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7") // or latest
 
-// ViewModel support for Jetpack Compose
+    // ViewModel support for Jetpack Compose
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
 
-// Kotlin coroutines (if you're using them in the ViewModel)
+    // Kotlin coroutines (if you're using them in the ViewModel)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1")
 
 
@@ -102,7 +102,11 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.8.9")
 
 
-    implementation ("androidx.compose.material:material-icons-extended:1.7.8")
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
 
-    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
+
+    implementation("io.coil-kt:coil-compose:2.6.0") // For images, if added
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.32.0")
+    implementation("androidx.compose.animation:animation:1.8.2")
 }
