@@ -112,7 +112,7 @@ fun HomeScreen(navHostController: NavHostController) {
                                             FeaturedStoriesCard(
                                                 story = story,
                                                 onClick = {
-                                                    navHostController.navigate("storyDetails/${story.id}")
+                                                    //navHostController.navigate("storyDetails/${story.id}")
                                                 }
                                             )
                                         }
@@ -125,7 +125,9 @@ fun HomeScreen(navHostController: NavHostController) {
                                 onRetry = { storyViewModel.fetchStories(isCompleted = false) }
                             )
 
-                            UiState.Initial -> TODO()
+                            UiState.Initial -> {
+
+                            }
                         }
                     }
 
@@ -158,52 +160,60 @@ fun HomeScreen(navHostController: NavHostController) {
                                 onRetry = { challengeViewModel.fetchChallenges() }
                             )
 
-                            UiState.Initial -> TODO()
+                            UiState.Initial -> {}
                         }
                     }
 
                     // Recent Contributions Section
-//                    item {
-//                        SectionTitle("Recent Contributions")
-//                        when (val state = contributionState) { // Assign to local variable
-//                            is UiState.Loading -> LoadingIndicator()
-//                            is UiState.Success -> {
-//                                if (state.data.contributions.isEmpty()) {
-//                                    EmptyStateMessage("No recent contributions available.")
-//                                } else {
-//                                    LazyColumn(
-//                                        verticalArrangement = Arrangement.spacedBy(12.dp)
-//                                    ) {
-//                                        items(state.data.contributions) { contribution ->
-//                                            val storyStateForContribution by storyViewModel.fetchStoryById(
-//                                                contribution.storyId
-//                                            ).collectAsState()
-//                                            when (val storyState = storyStateForContribution) {
-//                                                is UiState.Success -> {
-//                                                    ContributionCard(
-//                                                        contribution = contribution,
-//                                                        story = storyState.data,
-//                                                        onClick = {
-//                                                            navHostController.navigate("storyDetails/${contribution.storyId}")
-//                                                        }
-//                                                    )
-//                                                }
-//
-//                                                else -> {} // Optionally handle loading/error for story
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//                            }
-//
-//                            is UiState.Error -> ErrorState(
-//                                message = state.message,
-//                                onRetry = { contributionViewModel.fetchRecentContributions() }
-//                            )
-//
-//                            UiState.Initial -> TODO()
-//                        }
-//                    }
+                    item {
+                        SectionTitle("Recent Contributions")
+                        when (val state = contributionState) {
+                            is UiState.Loading -> LoadingIndicator()
+                            is UiState.Success -> {
+                                if (state.data.contributions.isEmpty()) {
+                                    EmptyStateMessage("No recent contributions available.")
+                                } else {
+                                    LazyColumn(
+                                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        items(state.data.contributions) { contribution ->
+                                            val storyStateForContribution by storyViewModel.getStoryById(
+                                                contribution.storyId
+                                            ).collectAsState()
+                                            when (val storyState = storyStateForContribution) {
+                                                is UiState.Success -> {
+                                                    ContributionCard(
+                                                        contribution = contribution,
+                                                        story = storyState.data,
+                                                        onClick = {
+                                                            navHostController.navigate("storyDetails/${contribution.storyId}")
+                                                        }
+                                                    )
+                                                }
+
+                                                is UiState.Loading -> LoadingIndicator()
+                                                is UiState.Error -> Text(
+                                                    text = storyState.message,
+                                                    color = MaterialTheme.colorScheme.error,
+                                                    fontSize = 14.sp,
+                                                    modifier = Modifier.padding(16.dp)
+                                                )
+
+                                                else -> {}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            is UiState.Error -> ErrorState(
+                                message = state.message,
+                                onRetry = { contributionViewModel.fetchRecentContributions() }
+                            )
+
+                            UiState.Initial -> {}
+                        }
+                    }
                 }
             }
         }
@@ -225,7 +235,6 @@ fun SectionTitle(title: String) {
 fun LoadingIndicator() {
     CircularProgressIndicator(
         modifier = Modifier
-            .fillMaxWidth()
             .padding(16.dp),
         color = MaterialTheme.colorScheme.secondary
     )

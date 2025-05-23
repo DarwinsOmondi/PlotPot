@@ -30,7 +30,34 @@ class ProfileViewModel(private val supabase: SupabaseClient) : ViewModel() {
                     .decodeSingleOrNull<Profile>()
                 _uiState.value = UiState.Success(ProfileUiState(profile))
             } catch (e: Exception) {
-                _uiState.value = UiState.Error("Failed to fetch profile: ${e.message}")
+                val message = e.message ?: ""
+                val userMessage = when {
+                    message.contains(
+                        "Unauthorized",
+                        ignoreCase = true
+                    ) -> "You are not logged in. PLease sign in."
+
+                    message.contains(
+                        "Forbidden",
+                        ignoreCase = true
+                    ) -> "You don't have permission to perform this action."
+
+                    message.contains(
+                        "timeout",
+                        ignoreCase = true
+                    ) || message.contains(
+                        "unreachable",
+                        ignoreCase = true
+                    ) -> "Network issue .Please try again later."
+
+                    message.contains(
+                        "Internal Server Error",
+                        ignoreCase = true
+                    ) -> "A server error occurred. Try again later."
+
+                    else -> "An expected error occurred : ${e.message}"
+                }
+                _uiState.value = UiState.Error(userMessage)
             }
         }
     }

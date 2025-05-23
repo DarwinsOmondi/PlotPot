@@ -17,12 +17,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.plotpot.customs.supabase
 import com.example.plotpot.screens.create.CreateStoryScreen
 import com.example.plotpot.screens.home.HomeScreen
 import com.example.plotpot.screens.signin.SignInScreen
 import com.example.plotpot.screens.signup.SignUpScreen
 import com.example.plotpot.ui.theme.PlotPotTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import io.github.jan.supabase.auth.auth
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
@@ -32,7 +34,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             PlotPotTheme {
                 val navController = rememberNavController()
-                val startDestination = if (getUserLoggedInStates(this)) "home" else "signin"
+                val startDestination =
+                    if (supabase.auth.currentUserOrNull() != null) "home" else "signin"
                 PlotPot(
                     navController = navController,
                     startDestination = startDestination,
