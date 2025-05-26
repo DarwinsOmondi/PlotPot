@@ -30,6 +30,7 @@ class StoryViewModel(private val supabase: SupabaseClient) : ViewModel() {
 
     private val _createUiState = MutableStateFlow<UiState<Unit>>(UiState.Initial)
     val createUiState: StateFlow<UiState<Unit>> = _createUiState.asStateFlow()
+
     init {
         fetchStory()
     }
@@ -38,12 +39,21 @@ class StoryViewModel(private val supabase: SupabaseClient) : ViewModel() {
         viewModelScope.launch {
             try {
                 _uiState.value = UiState.Loading
-                val stories = supabase.from("stories")
+                val stories = supabase.postgrest["stories"]
                     .select { filter { eq("isCompleted", isCompleted) } }
                     .decodeList<Story>()
-                val story = supabase.postgrest.from("stories").select().decodeSingle<Story>()
-                _uiState.value = UiState.Success(StoriesUiState(stories))
-                Log.d("StoryViewModel", "Fetched stories: $story")
+
+                //had an error wrote the for statement to check if supabase query is returning the right story
+                for (str in stories) {
+                    if (str.isCompleted == isCompleted) {
+                        Log.d("StoryViewModel", "Fetched stories if completed is false: $str")
+                    } else {
+                        Log.d("StoryViewModel", "Fetched stories if completed is true: $str")
+                    }
+                }
+                val story = supabase.postgrest["stories"].select().decodeList<Story>()
+                _uiState.value = UiState.Success(StoriesUiState(story))
+                // Log.d("StoryViewModel", "Fetched stories: $story")
             } catch (e: Exception) {
                 _uiState.value = UiState.Error("Failed to fetch stories: ${e.message}")
                 Log.e("StoryViewModel", "Failed to fetch stories: ${e.message}")
